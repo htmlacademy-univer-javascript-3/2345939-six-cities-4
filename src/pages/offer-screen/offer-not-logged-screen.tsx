@@ -1,4 +1,4 @@
-function PageOfferNotLogged(): JSX.Element {
+function OfferNotLoggedScreen(): JSX.Element {
   return (
     <div className="page">
       <header className="header">
@@ -284,4 +284,4 @@ function PageOfferNotLogged(): JSX.Element {
   );
 }
 
-export default PageOfferNotLogged;
+export default OfferNotLoggedScreen;

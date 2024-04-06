@@ -1,10 +1,19 @@
-function PlaceCard(): JSX.Element {
+import {Link} from 'react-router-dom';
+import {AppRoute} from '../../const';
+
+
+type PlaceCardProps = {
+  id: number;
+};
+
+function PlaceCard(props: PlaceCardProps): JSX.Element {
+  const {id} = props;
   return (
     <article className="cities__card place-card">
       <div className="cities__image-wrapper place-card__image-wrapper">
-        <a href="#">
+        <Link to={{ pathname: `${AppRoute.Offer}/${id}` }}>
           <img className="place-card__image" src="img/apartment-02.jpg" width="260" height="200" alt="Place image"/>
-        </a>
+        </Link>
       </div>
       <div className="place-card__info">
         <div className="place-card__price-wrapper">
