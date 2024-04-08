@@ -17,7 +17,7 @@ const offers: Offers = [
       zoom: 8
     },
     id: 1,
-    cardImage: `${PLACEHOLDER_URL}?text=Card+1`,
+    cardImage: 'img/apartment-02.jpg',
     price: 120,
     name: 'Beautiful & luxurious studio at great location',
     type: 'Apartment',
@@ -44,7 +44,7 @@ const offers: Offers = [
       zoom: 8
     },
     id: 2,
-    cardImage: `${PLACEHOLDER_URL}?text=Card+2`,
+    cardImage: 'img/apartment-03.jpg',
     price: 150,
     name: 'Modern & cozy apartment in city center',
     type: 'Apartment',
@@ -71,7 +71,7 @@ const offers: Offers = [
       zoom: 8
     },
     id: 3,
-    cardImage: `${PLACEHOLDER_URL}?text=Card+3`,
+    cardImage: 'img/apartment-01.jpg',
     price: 100,
     name: 'Charming studio with garden view',
     type: 'Studio',
@@ -98,7 +98,7 @@ const offers: Offers = [
       zoom: 8
     },
     id: 4,
-    cardImage: `${PLACEHOLDER_URL}?text=Card+4`,
+    cardImage: 'img/apartment-01.jpg',
     price: 200,
     name: 'Spacious apartment with stunning city views',
     type: 'Apartment',
