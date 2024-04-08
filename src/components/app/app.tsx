@@ -8,12 +8,12 @@ import NotFoundScreen from '../../pages/not-found-screen/not-found-screen';
 import PrivateRoute from '../private-route/private-route';
 
 type AppScreenProps = {
-  cntCard: number;
   authorizationStatus: AuthorizationStatus;
+  cntCard: number;
 };
 
 function App(props: AppScreenProps): JSX.Element {
-  const { cntCard, authorizationStatus } = props;
+  const { authorizationStatus, cntCard } = props;
   return (
     <BrowserRouter>
       <Routes>
