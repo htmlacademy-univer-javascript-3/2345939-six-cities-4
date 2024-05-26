@@ -1,7 +1,39 @@
+import { FormEvent, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { AppRoute } from '../../const';
 import { Link } from 'react-router-dom';
+import { login } from '../../store/action';
+import { selectAuthorizationStatus } from '../../store/selectors';
+import { AuthorizationStatus } from '../../const';
+import { AppDispatch } from '../../store';
+import { Navigate } from 'react-router-dom';
 
 function LoginScreen(): JSX.Element {
+  const dispatch: AppDispatch = useDispatch();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const authorizationStatus = useSelector(selectAuthorizationStatus);
+
+  const handleEmailChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(evt.target.value);
+  };
+
+
+  const handlePasswordChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(evt.target.value);
+  };
+
+  const handleSubmit = (evt: FormEvent<HTMLFormElement>) => {
+    evt.preventDefault();
+    dispatch(login({ email, password }));
+  };
+
+  if (authorizationStatus === AuthorizationStatus.Auth) {
+    return <Navigate to={AppRoute.Main} />;
+  }
+
+
   return (
     <div className="page page--gray page--login">
       <header className="header">
@@ -20,14 +52,30 @@ function LoginScreen(): JSX.Element {
         <div className="page__login-container container">
           <section className="login">
             <h1 className="login__title">Sign in</h1>
-            <form className="login__form form" action="#" method="post">
+            <form className="login__form form" onSubmit={handleSubmit}>
               <div className="login__input-wrapper form__input-wrapper">
                 <label className="visually-hidden">E-mail</label>
-                <input className="login__input form__input" type="email" name="email" placeholder="Email" required/>
+                <input
+                  className="login__input form__input"
+                  type="email"
+                  name="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={handleEmailChange}
+                  required
+                />
               </div>
               <div className="login__input-wrapper form__input-wrapper">
                 <label className="visually-hidden">Password</label>
-                <input className="login__input form__input" type="password" name="password" placeholder="Password" required/>
+                <input
+                  className="login__input form__input"
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={handlePasswordChange}
+                  required
+                />
               </div>
               <button className="login__submit form__submit button" type="submit">Sign in</button>
             </form>
