@@ -1,12 +1,13 @@
 export type Review = {
+  id: string;
+  date: string;
   user: {
     name: string;
-    avatarSrc: string;
+    avatarUrl: string;
+    isPro: boolean;
   };
+  comment: string;
   rating: number;
-  text: string;
-  date: Date;
-  id: number;
 }
 
 export type Host = {
@@ -17,27 +18,22 @@ export type Host = {
 }
 
 export type Offer = {
-  coordinates: {
-    lat: number;
-    lng: number;
-  };
-  city: City;
-  id: number;
-  cardImage: string;
-  price: number;
-  name: string;
+  id: string;
+  title: string;
   type: string;
+  price: number;
+  city: City;
+  location: {
+    latitude: number;
+    longitude: number;
+    zoom: number;
+  };
+  isFavorite: boolean;
+  isPremium: boolean;
   rating: number;
-  isPremium?: boolean;
-  isBookmarked?: boolean;
-  bedrooms: number;
-  maxGuests: number;
-  insideItems: string[];
-  offerGallery: string[];
-  host: Host;
-  reviews: Reviews;
-  nearPlaces: Offers;
+  previewImage: string;
 }
+
 
 export const enum CardType {
   Favorite = 'Favorite',
@@ -46,11 +42,47 @@ export const enum CardType {
 }
 
 export type City = {
-  title: string;
-  lat: number;
-  lng: number;
-  zoom: number;
+  name: string;
+  location: {
+    latitude: number;
+    longitude: number;
+    zoom: number;
+  };
 };
 
 export type Offers = Offer[]
 export type Reviews = Review[];
+
+export type WideOffer = {
+  id: string;
+  title: string;
+  type: string;
+  price: number;
+  city: City;
+  location: {
+    latitude: number;
+    longitude: number;
+    zoom: number;
+  };
+  isFavorite: boolean;
+  isPremium: boolean;
+  rating: number;
+  description: string;
+  bedrooms: number;
+  goods: string[];
+  host: {
+    name: string;
+    avatarUrl: string;
+    isPro: boolean;
+  };
+  images: string[];
+  maxAdults: number;
+}
+export type UserData = {
+  name: string;
+  avatarUrl: string;
+  isPro: boolean;
+  email: string;
+  token: string;
+};
+
