@@ -1,16 +1,23 @@
 import { monthMap } from '../../const';
 import { Review } from '../../types/types';
+import React, { useMemo } from 'react';
 
-type CardProps = {
+type ReviewComponentProps = {
   review: Review;
 }
 
-function ReviewItem({review}: CardProps): JSX.Element {
+const ReviewComponent = React.memo(({ review }: ReviewComponentProps): JSX.Element => {
+  const formattedDate = useMemo(() => {
+    const month = monthMap[Number(review.date.slice(5, 7))];
+    const year = review.date.slice(0, 4);
+    return `${month} ${year}`;
+  }, [review.date]);
+
   return (
     <li key={review.id} className="reviews__item">
       <div className="reviews__user user">
         <div className="reviews__avatar-wrapper user__avatar-wrapper">
-          <img className="reviews__avatar user__avatar" src={review.user.avatarSrc} width="54" height="54" alt="Reviews avatar"/>
+          <img className="reviews__avatar user__avatar" src={review.user.avatarUrl} width="54" height="54" alt="Reviews avatar"/>
         </div>
         <span className="reviews__user-name">
           {review.user.name}
@@ -24,12 +31,14 @@ function ReviewItem({review}: CardProps): JSX.Element {
           </div>
         </div>
         <p className="reviews__text">
-          {review.text}
+          {review.comment}
         </p>
-        <time className="reviews__time" dateTime={review.date.toISOString().slice(0, 10)}>{`${monthMap[Number(review.date.toISOString().slice(6, 7))]} ${review.date.toISOString().slice(0, 4)}`}</time>
+        <time className="reviews__time" dateTime={review.date.slice(0, 10)}>{formattedDate}</time>
       </div>
     </li>
   );
-}
+});
 
-export default ReviewItem;
+ReviewComponent.displayName = 'ReviewComponent';
+
+export default ReviewComponent;
