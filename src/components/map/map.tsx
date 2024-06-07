@@ -1,7 +1,7 @@
 import 'leaflet/dist/leaflet.css';
 import { Icon, Marker, layerGroup } from 'leaflet';
 import { City, Offers, Offer, WideOffer } from '../../types/types';
-import { URL_MARKER_CURRENT, URL_MARKER_DEFAULT, URL_MARKER_HOWERED } from '../../const';
+import { URL_MARKER_CURRENT, URL_MARKER_DEFAULT } from '../../const';
 import { useRef, useEffect, useMemo } from 'react';
 import useMap from '../../hooks/use-map';
 import React from 'react';
@@ -19,19 +19,19 @@ const MapComponent = React.memo(({ city, points, selectedPoint, hoveredPoint }: 
 
   const defaultCustomIcon = useMemo(() => new Icon({
     iconUrl: URL_MARKER_DEFAULT,
-    iconSize: [40, 40],
+    iconSize: [27, 39],
     iconAnchor: [20, 40]
   }), []);
 
   const currentCustomIcon = useMemo(() => new Icon({
     iconUrl: URL_MARKER_CURRENT,
-    iconSize: [40, 40],
+    iconSize: [27, 39],
     iconAnchor: [20, 40]
   }), []);
 
   const hoveredCustomIcon = useMemo(() => new Icon({
-    iconUrl: URL_MARKER_HOWERED,
-    iconSize: [40, 40],
+    iconUrl: URL_MARKER_CURRENT,
+    iconSize: [27, 39],
     iconAnchor: [20, 40]
   }), []);
 

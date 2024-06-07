@@ -134,7 +134,7 @@ const OfferScreen = React.memo((): JSX.Element => {
               </div>
               <div className="offer__rating rating">
                 <div className="offer__stars rating__stars">
-                  <span style={{ width: `${currentOffer.rating * 20}%` }}></span>
+                  <span style={{ width: `${Math.round(currentOffer.rating) * 20}%` }}></span>
                   <span className="visually-hidden">Rating</span>
                 </div>
                 <span className="offer__rating-value rating__value">{currentOffer.rating}</span>
@@ -144,10 +144,10 @@ const OfferScreen = React.memo((): JSX.Element => {
                   {currentOffer.type}
                 </li>
                 <li className="offer__feature offer__feature--bedrooms">
-                  {currentOffer.bedrooms} Bedrooms
+                  {currentOffer.bedrooms} Bedroom{currentOffer.bedrooms === 1 ? '' : 's'}
                 </li>
                 <li className="offer__feature offer__feature--adults">
-                  Max {currentOffer.maxAdults} adults
+                  Max {currentOffer.maxAdults} adult{currentOffer.maxAdults === 1 ? '' : 's'}
                 </li>
               </ul>
               <div className="offer__price">

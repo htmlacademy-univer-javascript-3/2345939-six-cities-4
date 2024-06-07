@@ -23,6 +23,7 @@ function MainScreen(): JSX.Element {
 
   const [sortedOffers, setSortedOffers] = useState<Offer[]>([]);
   const [hoveredOffer, setHoveredOffer] = useState<Offer | undefined>(undefined);
+  const [selectedSortType, setSelectedSortType] = useState<string>('');
 
   useEffect(() => {
     setSortedOffers(offers.filter((offer) => offer.city.name === city.name));
@@ -33,6 +34,7 @@ function MainScreen(): JSX.Element {
   }, [dispatch]);
 
   const handleSortChange = useCallback((sortType: string) => {
+    setSelectedSortType(sortType); // Обновляем сохраненный тип сортировки
     let sorted = [...offers.filter((offer) => offer.city.name === city.name)];
     switch (sortType) {
       case 'Price: low to high':
@@ -45,12 +47,18 @@ function MainScreen(): JSX.Element {
         sorted.sort((a, b) => b.rating - a.rating);
         break;
       default:
-
         sorted = [...offers.filter((offer) => offer.city.name === city.name)];
         break;
     }
     setSortedOffers(sorted);
   }, [city.name, offers]);
+
+  useEffect(() => {
+    setSortedOffers(offers.filter((offer) => offer.city.name === city.name));
+    if (selectedSortType) { // Проверяем, есть ли сохраненный тип сортировки
+      handleSortChange(selectedSortType); // Применяем сохраненную сортировку
+    }
+  }, [city, offers, selectedSortType, handleSortChange]);
 
   const handleLogoutClick = useCallback((evt: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     evt.preventDefault();
