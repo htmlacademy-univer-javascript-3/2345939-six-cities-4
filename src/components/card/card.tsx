@@ -1,81 +1,79 @@
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Offer, CardType } from '../../types/types';
 import { toggleFavoriteStatus } from '../../store/action';
-import { selectAuthorizationStatus, selectFavorites } from '../../store/selectors';
 import { useNavigate } from 'react-router-dom';
 import { AppRoute, AuthorizationStatus } from '../../const';
 import { AppDispatch } from '../../store';
+import React, { useCallback, useMemo } from 'react';
 
 type CardComponentProps = {
   offer: Offer;
   cardType: CardType;
+  isFavorite: boolean;
+  authorizationStatus: AuthorizationStatus;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
 };
 
-
-function CardComponent({ offer, cardType, onMouseEnter, onMouseLeave }: CardComponentProps): JSX.Element {
+const CardComponent = React.memo(({ offer, cardType, isFavorite, authorizationStatus, onMouseEnter, onMouseLeave }: CardComponentProps): JSX.Element => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
-  const authorizationStatus = useSelector(selectAuthorizationStatus);
-  const favorites = useSelector(selectFavorites);
 
-  const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
-  const isFavorite = favorites.some((favorite) => favorite.id === offer.id);
-
-  const articleHandle = (type: CardType) => {
-    if (type === CardType.Near) {
-      return 'near-places__card';
-    }
-    if (type === CardType.Favorite) {
-      return 'favorites__card';
-    }
-    if (type === CardType.City) {
-      return 'cities__card';
-    }
-  };
-
-  const wrapperHandle = (type: CardType) => {
-    if (type === CardType.Near) {
-      return 'near-places__image-wrapper';
-    }
-    if (type === CardType.Favorite) {
-      return 'favorites__image-wrapper';
-    }
-    if (type === CardType.City) {
-      return 'cities__image-wrapper';
-    }
-  };
-
-  const imageSizeHandle = (type: CardType) => {
-    if (type === CardType.Favorite) {
-      return ['150', '110'];
-    } else {
-      return ['260', '200'];
-    }
-  };
-
-  const handleFavoriteClick = () => {
+  const handleFavoriteClick = useCallback(() => {
     if (authorizationStatus !== AuthorizationStatus.Auth) {
       navigate(AppRoute.Login);
       return;
     }
-
     dispatch(toggleFavoriteStatus({ offerId: offer.id, status: isFavorite ? 0 : 1 }));
-  };
+  }, [authorizationStatus, navigate, dispatch, offer.id, isFavorite]);
 
+  const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+
+  const articleClassName = useMemo(() => {
+    switch (cardType) {
+      case CardType.Near:
+        return 'near-places__card';
+      case CardType.Favorite:
+        return 'favorites__card';
+      case CardType.City:
+        return 'cities__card';
+      default:
+        return '';
+    }
+  }, [cardType]);
+
+  const wrapperClassName = useMemo(() => {
+    switch (cardType) {
+      case CardType.Near:
+        return 'near-places__image-wrapper';
+      case CardType.Favorite:
+        return 'favorites__image-wrapper';
+      case CardType.City:
+        return 'cities__image-wrapper';
+      default:
+        return '';
+    }
+  }, [cardType]);
+
+  const imageSize = useMemo(() => {
+    if (cardType === CardType.Favorite) {
+      return ['150', '110'];
+    } else {
+      return ['260', '200'];
+    }
+  }, [cardType]);
 
   return (
-    <article className={`${articleHandle(cardType)} place-card`} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+    <article className={`${articleClassName} place-card`} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
       {offer.isPremium && (
         <div className="place-card__mark">
           <span>Premium</span>
         </div>
       )}
-      <div className={`${wrapperHandle(cardType)} place-card__image-wrapper`}>
-        <Link to={{ pathname: `/offer/${offer.id}` }}>
-          <img className="place-card__image" src={offer.previewImage} width={imageSizeHandle(cardType)[0]} height={imageSizeHandle(cardType)[1]} alt="Place image" />
+      <div className={`${wrapperClassName} place-card__image-wrapper`}>
+        <Link to={`/offer/${offer.id}`}>
+          <img className="place-card__image" src={offer.previewImage} width={imageSize[0]} height={imageSize[1]} alt="Place image" />
         </Link>
       </div>
       <div className={`${cardType === CardType.Favorite ? 'favorites__card-info' : ''} place-card__info`}>
@@ -93,17 +91,22 @@ function CardComponent({ offer, cardType, onMouseEnter, onMouseLeave }: CardComp
         </div>
         <div className="place-card__rating rating">
           <div className="place-card__stars rating__stars">
-            <span style={{ width: `${offer.rating * 20}%` }}></span>
+            <span style={{ width: `${Math.round(offer.rating) * 20}%` }}></span>
             <span className="visually-hidden">Rating</span>
           </div>
         </div>
         <h2 className="place-card__name">
-          <Link to={{ pathname: `/offer/${offer.id}` }}>{offer.title}</Link>
+          <Link to={`/offer/${offer.id}`}>{offer.title}</Link>
         </h2>
         <p className="place-card__type">{capitalizeFirstLetter(offer.type)}</p>
       </div>
     </article>
   );
-}
+}, (prevProps, nextProps) => prevProps.isFavorite === nextProps.isFavorite &&
+         prevProps.offer === nextProps.offer &&
+         prevProps.cardType === nextProps.cardType &&
+         prevProps.authorizationStatus === nextProps.authorizationStatus);
+
+CardComponent.displayName = 'CardComponent';
 
 export default CardComponent;

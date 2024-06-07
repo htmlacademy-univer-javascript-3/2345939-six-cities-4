@@ -1,3 +1,4 @@
+import React, { useCallback } from 'react';
 import { City } from '../../types/types';
 
 type CityListProps = {
@@ -6,7 +7,11 @@ type CityListProps = {
   onCityChange: (city: City) => void;
 };
 
-function CityList({ cities, currentCity, onCityChange }: CityListProps): JSX.Element {
+const CityList = React.memo(({ cities, currentCity, onCityChange }: CityListProps): JSX.Element => {
+  const handleCityClick = useCallback((city: City) => () => {
+    onCityChange(city);
+  }, [onCityChange]);
+
   return (
     <section className="locations container">
       <ul className="locations__list tabs__list">
@@ -14,7 +19,7 @@ function CityList({ cities, currentCity, onCityChange }: CityListProps): JSX.Ele
           <li
             className="locations__item"
             key={city.name}
-            onClick={() => onCityChange(city)}
+            onClick={handleCityClick(city)}
           >
             <a
               className={`locations__item-link tabs__item ${
@@ -29,6 +34,8 @@ function CityList({ cities, currentCity, onCityChange }: CityListProps): JSX.Ele
       </ul>
     </section>
   );
-}
+});
+
+CityList.displayName = 'CityList';
 
 export default CityList;

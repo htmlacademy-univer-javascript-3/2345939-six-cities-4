@@ -9,25 +9,32 @@ import MapComponent from '../../components/map/map';
 import CityList from '../../components/city-list/city-list';
 import SortOptions from '../../components/sort-options/sort-options';
 import { CITIES } from '../../const';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AppDispatch } from '../../store';
 
 function MainScreen(): JSX.Element {
   const dispatch: AppDispatch = useDispatch();
   const city = useSelector(selectCity);
   const offers = useSelector(selectOffers);
-  const [sortedOffers, setSortedOffers] = useState<Offer[]>([]);
-  const [hoveredOffer, setHoveredOffer] = useState<Offer | undefined>(undefined);
   const isLoadingOffers = useSelector(selectLoadingStatusOffers);
   const authorizationStatus = useSelector(selectAuthorizationStatus);
   const userData = useSelector(selectUserData);
   const favorites = useSelector(selectFavorites);
 
-  const handleCityChange = (newCity: City) => {
-    dispatch(setCity(newCity));
-  };
+  const [sortedOffers, setSortedOffers] = useState<Offer[]>([]);
+  const [hoveredOffer, setHoveredOffer] = useState<Offer | undefined>(undefined);
+  const [selectedSortType, setSelectedSortType] = useState<string>('');
 
-  const handleSortChange = (sortType: string) => {
+  useEffect(() => {
+    setSortedOffers(offers.filter((offer) => offer.city.name === city.name));
+  }, [city, offers]);
+
+  const handleCityChange = useCallback((newCity: City) => {
+    dispatch(setCity(newCity));
+  }, [dispatch]);
+
+  const handleSortChange = useCallback((sortType: string) => {
+    setSelectedSortType(sortType); // Обновляем сохраненный тип сортировки
     let sorted = [...offers.filter((offer) => offer.city.name === city.name)];
     switch (sortType) {
       case 'Price: low to high':
@@ -40,21 +47,23 @@ function MainScreen(): JSX.Element {
         sorted.sort((a, b) => b.rating - a.rating);
         break;
       default:
-        // 'Popular' or any other case, reset to original order
         sorted = [...offers.filter((offer) => offer.city.name === city.name)];
         break;
     }
     setSortedOffers(sorted);
-  };
+  }, [city.name, offers]);
 
   useEffect(() => {
     setSortedOffers(offers.filter((offer) => offer.city.name === city.name));
-  }, [city, offers]);
+    if (selectedSortType) { // Проверяем, есть ли сохраненный тип сортировки
+      handleSortChange(selectedSortType); // Применяем сохраненную сортировку
+    }
+  }, [city, offers, selectedSortType, handleSortChange]);
 
-  const handleLogoutClick = (evt: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+  const handleLogoutClick = useCallback((evt: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     evt.preventDefault();
     dispatch(logout());
-  };
+  }, [dispatch]);
 
   return (
     <div className="page page--gray page--main">
@@ -62,7 +71,7 @@ function MainScreen(): JSX.Element {
         <div className="container">
           <div className="header__wrapper">
             <div className="header__left">
-              <Link className="header__logo-link header__logo-link--active" to={{ pathname: AppRoute.Main }}>
+              <Link className="header__logo-link header__logo-link--active" to={AppRoute.Main}>
                 <img className="header__logo" src="img/logo.svg" alt="6 cities logo" width="81" height="41"/>
               </Link>
             </div>
@@ -70,8 +79,8 @@ function MainScreen(): JSX.Element {
               {authorizationStatus === AuthorizationStatus.Auth ? (
                 <ul className="header__nav-list">
                   <li className="header__nav-item user">
-                    <NavLink className="header__nav-link header__nav-link--profile" to={{ pathname: AppRoute.Favorites}}>
-                      <div className="header__avatar-wrapper user__avatar-wrapper"><img src={userData?.avatarUrl}/></div>
+                    <NavLink className="header__nav-link header__nav-link--profile" to={AppRoute.Favorites}>
+                      <div className="header__avatar-wrapper user__avatar-wrapper"><img src={userData?.avatarUrl} alt="User avatar"/></div>
                       <span className="header__user-name user__name">{userData?.email}</span>
                       <span className="header__favorite-count">{favorites.length}</span>
                     </NavLink>
@@ -84,9 +93,8 @@ function MainScreen(): JSX.Element {
                 </ul>) : (
                 <ul className="header__nav-list">
                   <li className="header__nav-item user">
-                    <NavLink className="header__nav-link header__nav-link--profile" to={{ pathname: AppRoute.Login}}>
-                      <div className="header__avatar-wrapper user__avatar-wrapper">
-                      </div>
+                    <NavLink className="header__nav-link header__nav-link--profile" to={AppRoute.Login}>
+                      <div className="header__avatar-wrapper user__avatar-wrapper"></div>
                       <span className="header__login">Sign in</span>
                     </NavLink>
                   </li>
@@ -116,7 +124,13 @@ function MainScreen(): JSX.Element {
                   {sortedOffers.length} places to stay in {city.name}
                 </b>
                 <SortOptions onSortChange={handleSortChange} />
-                <CardListComponent offers={sortedOffers} cardsType={CardType.City} onCardHover={setHoveredOffer} />
+                <CardListComponent
+                  offers={sortedOffers}
+                  cardsType={CardType.City}
+                  onCardHover={setHoveredOffer}
+                  favorites={favorites}
+                  authorizationStatus={authorizationStatus}
+                />
               </section>
               <div className="cities__right-section">
                 <section className="cities__map map">
@@ -140,8 +154,6 @@ function MainScreen(): JSX.Element {
             </div>
           </div>
         )}
-
-
       </main>
     </div>
   );

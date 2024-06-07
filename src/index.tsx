@@ -4,8 +4,9 @@ import { store } from './store';
 import { fetchOffers } from './store/action';
 import { Provider } from 'react-redux';
 
-store.dispatch(fetchOffers());
-
+(async () => {
+  await store.dispatch(fetchOffers());
+})();
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -13,6 +14,6 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <Provider store={store}>
-    <App/>
+    <App />
   </Provider>
 );

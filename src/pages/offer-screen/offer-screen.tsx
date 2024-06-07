@@ -7,14 +7,14 @@ import CardListComponent from '../../components/card-list/card-list';
 import ReviewFormComponent from '../../components/review-form/review-form';
 import ReviewListComponent from '../../components/review-list/review-list';
 import MapComponent from '../../components/map/map';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchOffer, fetchReviews, fetchNearbyOffers, logout, toggleFavoriteStatus } from '../../store/action';
 import { AppDispatch } from '../../store/index';
+import React from 'react';
 
-function OfferScreen(): JSX.Element {
+const OfferScreen = React.memo((): JSX.Element => {
   const navigate = useNavigate();
   const dispatch: AppDispatch = useDispatch();
-
   const offerId = useParams().id ?? '';
 
   useEffect(() => {
@@ -32,14 +32,24 @@ function OfferScreen(): JSX.Element {
   const authorizationStatus = useSelector(selectAuthorizationStatus);
   const userData = useSelector(selectUserData);
   const favorites = useSelector(selectFavorites);
-  const isFavorite = favorites.some((favorite) => favorite.id === currentOffer?.id);
+  const isFavorite = useMemo(() => favorites.some((favorite) => favorite.id === currentOffer?.id), [favorites, currentOffer]);
 
   const [hoveredOffer, setHoveredOffer] = useState<Offer | undefined>(undefined);
 
-  const handleLogoutClick = (evt: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+  const handleLogoutClick = useCallback((evt: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     evt.preventDefault();
     dispatch(logout());
-  };
+  }, [dispatch]);
+
+  const handleFavoriteClick = useCallback(() => {
+    if (authorizationStatus !== AuthorizationStatus.Auth) {
+      navigate(AppRoute.Login);
+      return;
+    }
+    if (currentOffer) {
+      dispatch(toggleFavoriteStatus({ offerId: currentOffer.id, status: isFavorite ? 0 : 1 }));
+    }
+  }, [authorizationStatus, navigate, dispatch, currentOffer, isFavorite]);
 
   if (isLoadingOffer) {
     return <div>Loading...</div>;
@@ -48,15 +58,6 @@ function OfferScreen(): JSX.Element {
   if (!currentOffer) {
     return <Navigate to={AppRoute.Error} />;
   }
-  const handleFavoriteClick = () => {
-    if (authorizationStatus !== AuthorizationStatus.Auth) {
-      navigate(AppRoute.Login);
-      return;
-    }
-
-    dispatch(toggleFavoriteStatus({ offerId: currentOffer.id, status: isFavorite ? 0 : 1 }));
-  };
-
 
   return (
     <div className="page">
@@ -64,16 +65,16 @@ function OfferScreen(): JSX.Element {
         <div className="container">
           <div className="header__wrapper">
             <div className="header__left">
-              <Link className="header__logo-link" to={{ pathname: AppRoute.Main }}>
-                <img className="header__logo" src="img/logo.svg" alt="6 cities logo" width="81" height="41"/>
+              <Link className="header__logo-link" to={AppRoute.Main}>
+                <img className="header__logo" src="img/logo.svg" alt="6 cities logo" width="81" height="41" />
               </Link>
             </div>
             <nav className="header__nav">
               {authorizationStatus === AuthorizationStatus.Auth ? (
                 <ul className="header__nav-list">
                   <li className="header__nav-item user">
-                    <NavLink className="header__nav-link header__nav-link--profile" to={{ pathname: AppRoute.Favorites}}>
-                      <div className="header__avatar-wrapper user__avatar-wrapper"><img src={userData?.avatarUrl}/></div>
+                    <NavLink className="header__nav-link header__nav-link--profile" to={AppRoute.Favorites}>
+                      <div className="header__avatar-wrapper user__avatar-wrapper"><img src={userData?.avatarUrl} alt="User avatar" /></div>
                       <span className="header__user-name user__name">{userData?.email}</span>
                       <span className="header__favorite-count">{favorites.length}</span>
                     </NavLink>
@@ -86,9 +87,8 @@ function OfferScreen(): JSX.Element {
                 </ul>) : (
                 <ul className="header__nav-list">
                   <li className="header__nav-item user">
-                    <NavLink className="header__nav-link header__nav-link--profile" to={{ pathname: AppRoute.Login}}>
-                      <div className="header__avatar-wrapper user__avatar-wrapper">
-                      </div>
+                    <NavLink className="header__nav-link header__nav-link--profile" to={AppRoute.Login}>
+                      <div className="header__avatar-wrapper user__avatar-wrapper"></div>
                       <span className="header__login">Sign in</span>
                     </NavLink>
                   </li>
@@ -105,7 +105,7 @@ function OfferScreen(): JSX.Element {
             <div className="offer__gallery">
               {currentOffer.images.slice(0, 6).map((item) => (
                 <div key={item} className="offer__image-wrapper">
-                  <img className="offer__image" src={item} alt="Photo studio"/>
+                  <img className="offer__image" src={item} alt="Photo studio" />
                 </div>
               ))}
             </div>
@@ -134,7 +134,7 @@ function OfferScreen(): JSX.Element {
               </div>
               <div className="offer__rating rating">
                 <div className="offer__stars rating__stars">
-                  <span style={{width: `${currentOffer.rating * 20}%`}}></span>
+                  <span style={{ width: `${Math.round(currentOffer.rating) * 20}%` }}></span>
                   <span className="visually-hidden">Rating</span>
                 </div>
                 <span className="offer__rating-value rating__value">{currentOffer.rating}</span>
@@ -144,10 +144,10 @@ function OfferScreen(): JSX.Element {
                   {currentOffer.type}
                 </li>
                 <li className="offer__feature offer__feature--bedrooms">
-                  {currentOffer.bedrooms} Bedrooms
+                  {currentOffer.bedrooms} Bedroom{currentOffer.bedrooms === 1 ? '' : 's'}
                 </li>
                 <li className="offer__feature offer__feature--adults">
-                Max {currentOffer.maxAdults} adults
+                  Max {currentOffer.maxAdults} adult{currentOffer.maxAdults === 1 ? '' : 's'}
                 </li>
               </ul>
               <div className="offer__price">
@@ -168,7 +168,7 @@ function OfferScreen(): JSX.Element {
                 <h2 className="offer__host-title">Meet the host</h2>
                 <div className="offer__host-user user">
                   <div className={`offer__avatar-wrapper ${currentOffer.host.isPro ? 'offer__avatar-wrapper--pro' : ''} user__avatar-wrapper`}>
-                    <img className="offer__avatar user__avatar" src={currentOffer.host.avatarUrl} width="74" height="74" alt="Host avatar"/>
+                    <img className="offer__avatar user__avatar" src={currentOffer.host.avatarUrl} width="74" height="74" alt="Host avatar" />
                   </div>
                   <span className="offer__user-name">
                     {currentOffer.host.name}
@@ -185,7 +185,6 @@ function OfferScreen(): JSX.Element {
               </div>
 
               <section className="offer__reviews reviews">
-
                 <h2 className="reviews__title">Reviews &middot; <span className="reviews__amount">{reviews.length}</span></h2>
                 <ReviewListComponent reviews={reviews} />
                 {authorizationStatus === AuthorizationStatus.Auth && (<ReviewFormComponent offerId={offerId} />)}
@@ -197,16 +196,16 @@ function OfferScreen(): JSX.Element {
           </section>
         </section>
         <div className="container">
-
-
           <section className="near-places places">
             <h2 className="near-places__title">Other places in the neighbourhood</h2>
-            <CardListComponent offers={nearPlaces.slice(0, 3)} cardsType={CardType.Near} onCardHover={setHoveredOffer} />
+            <CardListComponent offers={nearPlaces.slice(0, 3)} cardsType={CardType.Near} onCardHover={setHoveredOffer} favorites={favorites} authorizationStatus={authorizationStatus} />
           </section>
         </div>
       </main>
     </div>
   );
-}
+});
+
+OfferScreen.displayName = 'OfferScreen';
 
 export default OfferScreen;

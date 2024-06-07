@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import React from 'react';
 
 type SortOptionsProps = {
   onSortChange: (sortType: string) => void;
@@ -6,20 +7,24 @@ type SortOptionsProps = {
 
 const SORT_TYPES = ['Popular', 'Price: low to high', 'Price: high to low', 'Top rated first'];
 
-function SortOptions({ onSortChange }: SortOptionsProps): JSX.Element {
+const SortOptions = React.memo(({ onSortChange }: SortOptionsProps): JSX.Element => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedSort, setSelectedSort] = useState('Popular');
 
-  const handleSortChange = (sortType: string) => {
+  const handleSortChange = useCallback((sortType: string) => {
     setSelectedSort(sortType);
     onSortChange(sortType);
     setIsOpen(false);
-  };
+  }, [onSortChange]);
+
+  const toggleOpen = useCallback(() => {
+    setIsOpen((prevIsOpen) => !prevIsOpen);
+  }, []);
 
   return (
     <form className="places__sorting" action="#" method="get">
       <span className="places__sorting-caption">Sort by</span>
-      <span className="places__sorting-type" tabIndex={0} onClick={() => setIsOpen(!isOpen)}>
+      <span className="places__sorting-type" tabIndex={0} onClick={toggleOpen}>
         &nbsp;{selectedSort}
         <svg className="places__sorting-arrow" width="7" height="4">
           <use xlinkHref="#icon-arrow-select"></use>
@@ -41,6 +46,8 @@ function SortOptions({ onSortChange }: SortOptionsProps): JSX.Element {
       )}
     </form>
   );
-}
+});
+
+SortOptions.displayName = 'SortOptions';
 
 export default SortOptions;
